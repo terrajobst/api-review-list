@@ -116,13 +116,33 @@
                         <DataTemplate>
                             <StackPanel Orientation="Vertical"
                                         Margin="20,6,20,6">
-                                <TextBlock Text="{Binding Title}"
-                                           FontSize="16px"
-                                           FontWeight="Bold" />
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding DetailText}"
-                                               Foreground="DarkSlateGray" />
+                                    <TextBlock Text="{Binding Title}"
+                                               FontSize="16px"
+                                               FontWeight="Bold" />
+                                    <ItemsControl ItemsSource="{Binding Labels}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border VerticalAlignment="Center"
+                                                        Margin="8,0,0,0"
+                                                        Padding="5,2,5,2"                                                        
+                                                        Background="{Binding Background}"
+                                                        CornerRadius="2">
+                                                    <TextBlock Text="{Binding Text}"
+                                                               FontWeight="Bold"
+                                                               Foreground="{Binding Foreground}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </StackPanel>
+                                <TextBlock Text="{Binding DetailText}"
+                                           Foreground="DarkSlateGray" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

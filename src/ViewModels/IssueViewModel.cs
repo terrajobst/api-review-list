@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Octokit;
 
 namespace ApiReviewList.ViewModels
@@ -11,6 +13,7 @@ namespace ApiReviewList.ViewModels
             Repo = repo;
             Model = model;
             Milestone = milestone;
+            Labels = model.Labels.Select(l => new LabelViewModel(l)).ToList().AsReadOnly();
         }
 
         public string Org { get; }
@@ -37,5 +40,7 @@ namespace ApiReviewList.ViewModels
         }
 
         public MilestoneViewModel Milestone { get; }
+
+        public ReadOnlyCollection<LabelViewModel> Labels { get; }
     }
 }

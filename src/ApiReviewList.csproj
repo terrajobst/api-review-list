@@ -58,6 +58,7 @@
     </ApplicationDefinition>
     <Compile Include="ApiKeyStore.cs" />
     <Compile Include="GitHubClientFactory.cs" />
+    <Compile Include="ViewModels\LabelViewModel.cs" />
     <Compile Include="ViewModels\MilestoneViewModel.cs" />
     <Compile Include="ViewModels\OrgAndRepo.cs" />
     <Compile Include="ViewModels\TimeFormatting.cs" />
