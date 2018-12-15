@@ -28,14 +28,15 @@ namespace ApiReviewList.ViewModels
 
         public string Title => Model.Title;
 
+        public string Author => Model.User.Login;
+
         public string DetailText
         {
             get
             {
-                var userName = Model.User.Login;
                 var age = DateTimeOffset.Now - Model.CreatedAt;
                 var ageText = TimeFormatting.Format(age);
-                return $"{IdFull} {ageText} by {userName}";
+                return $"{IdFull} {ageText} by {Author}";
             }
         }
 

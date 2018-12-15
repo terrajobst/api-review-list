@@ -109,6 +109,9 @@ namespace ApiReviewList.ViewModels
             if (vm.IdFull.IndexOf(_filter, StringComparison.OrdinalIgnoreCase) >= 0)
                 return true;
 
+            if (vm.Author.IndexOf(_filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+
             foreach (var label in vm.Labels)
             {
                 if (label.Text.IndexOf(_filter, StringComparison.OrdinalIgnoreCase) >= 0)
