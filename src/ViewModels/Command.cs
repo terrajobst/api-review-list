@@ -22,6 +22,8 @@ namespace ApiReviewList.ViewModels
             _handler();
         }
 
+#pragma warning disable 67
         public event EventHandler CanExecuteChanged;
+#pragma warning restore
     }
 }
