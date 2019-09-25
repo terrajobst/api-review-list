@@ -50,7 +50,7 @@ namespace ApiReviewList
             if (DataGrid.SelectedItem is IssueViewModel issue)
             {
                 var url = issue.Model.HtmlUrl;
-                Process.Start(url);
+                Shell.Execute(url);
             }
         }
 

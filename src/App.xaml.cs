@@ -40,7 +40,7 @@ namespace ApiReviewList
             MessageBox.Show(registerKeyMessage, "API Review List", MessageBoxButton.OK, MessageBoxImage.Information);
 
             var url = "https://github.com/settings/tokens/new";
-            Process.Start(url);
+            Shell.Execute(url);
 
             while (true)
             {
