@@ -9,17 +9,18 @@ if not "%VSINSTALLDIR%" == "" goto setmsbuild
 
 set VSWHERE="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 if not exist %VSWHERE% goto error
-for /f "tokens=*" %%i in ('%VSWHERE% -property installationPath') do set VSINSTALLDIR=%%i
+for /f "tokens=*" %%i in ('%VSWHERE% -property installationPath -prerelease') do set VSINSTALLDIR=%%i
 
 :setmsbuild
 
-set MSBuild="%VSINSTALLDIR%\MSBuild\15.0\Bin\MSBuild.exe"
+set MSBuild="%VSINSTALLDIR%\MSBuild\Current\Bin\MSBuild.exe"
+echo %MSBuild%
 if exist %MSBuild% goto build
 
 :error
 
 if exist %MSBuild% goto build
-echo ERROR: You need Visual Studio 2017 to build.
+echo ERROR: You need Visual Studio to build.
 exit /B -1
 
 :build
