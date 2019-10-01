@@ -4,12 +4,15 @@ using System.Collections.ObjectModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+
+using ApiReviewList.Reports;
+
 using Markdig;
-using Markdig.Syntax;
+
 using Microsoft.Office.Interop.Outlook;
+
 using Octokit;
 
 namespace ApiReviewList.ViewModels
@@ -86,101 +89,33 @@ namespace ApiReviewList.ViewModels
 
         public async void Notes()
         {
-            static string GetApiStatus(Issue issue)
-            {
-                var approved = issue.Labels.Any(l => l.Name == "api-approved");
-                var needsWork = issue.Labels.Any(l => l.Name == "api-needs-work");
-                var isApi = approved || needsWork;
-                var isClosed = issue.State.Value == ItemState.Closed;
-
-                if (!isApi)
-                    return null;
-
-                if (approved)
-                    return "Approved";
-
-                if (isClosed)
-                    return "Rejected";
-
-                return "Needs Work";
-            }
-
-            static bool HasApiEvent(IEnumerable<EventInfo> events, DateTimeOffset date)
-            {
-                foreach (var e in events)
-                {
-                    if (e.CreatedAt.Date == date)
-                    {
-                        switch (e.Event.Value)
-                        {
-                            case EventInfoState.Labeled:
-                                if (e.Label.Name == "api-approved" || e.Label.Name == "api-needs-work")
-                                    return true;
-                                break;
-                            case EventInfoState.Closed:
-                                return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
-
             var date = DateTimeOffset.Now.Date;
-            var user = "terrajobst";
-
-            var reposText = ConfigurationManager.AppSettings["Repos"];
-            var repos = OrgAndRepo.ParseList(reposText).ToArray();
-
-            var github = GitHubClientFactory.Create();
 
             var noteWriter = new StringWriter();
 
-            foreach (var (org, repo) in repos)
+            foreach (var f in await ApiReviewNotes.GetFeedbackAsync(date))
             {
-                var request = new RepositoryIssueRequest();
-                request.Filter = IssueFilter.All;
-                request.State = ItemStateFilter.All;
-                request.Since = date;
+                noteWriter.WriteLine($"## {f.IssueTitle}");
+                noteWriter.WriteLine();
+                noteWriter.WriteLine($"**{f.FeedbackStatus}** | [#{f.Repo}/{f.IssueNumber}]({f.FeedbackUrl})");
+                noteWriter.WriteLine();
 
-                var issues = await github.Issue.GetAllForRepository(org, repo, request);
-
-                foreach (var issue in issues)
+                if (f.FeedbackMarkdown != null)
                 {
-                    var status = GetApiStatus(issue);
-                    if (status == null)
-                        continue;
-
-                    var events = await github.Issue.Events.GetAllForIssue(org, repo, issue.Number);
-                    if (!HasApiEvent(events, date))
-                        continue;
-
-                    var comments = await github.Issue.Comment.GetAllForIssue(org, repo, issue.Number);
-                    var latestFeedback = comments.LastOrDefault(c => c.User.Login == user);
-                    var url = latestFeedback?.HtmlUrl ?? issue.HtmlUrl;
-
-                    noteWriter.WriteLine($"## {issue.Title}");
+                    noteWriter.Write(f.FeedbackMarkdown);
                     noteWriter.WriteLine();
-                    noteWriter.WriteLine($"**{status}** | [#{repo}/{issue.Number}]({url})");
-                    noteWriter.WriteLine();
-
-                    if (latestFeedback != null)
-                    {
-                        noteWriter.Write(latestFeedback.Body);
-                        noteWriter.WriteLine();
-                    }
                 }
-
-                var markdown = noteWriter.ToString();
-                var html = Markdown.ToHtml(markdown);
-
-                var outlookApp = new Microsoft.Office.Interop.Outlook.Application();
-                var mailItem = (MailItem) outlookApp.CreateItem(OlItemType.olMailItem);
-                mailItem.To = "FXDR";
-                mailItem.Subject = $"API Review Notes {date.ToString("d")}";
-                mailItem.HTMLBody = html;
-                mailItem.Display(false);
             }
+
+            var markdown = noteWriter.ToString();
+            var html = Markdown.ToHtml(markdown);
+
+            var outlookApp = new Microsoft.Office.Interop.Outlook.Application();
+            var mailItem = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+            mailItem.To = "FXDR";
+            mailItem.Subject = $"API Review Notes {date.ToString("d")}";
+            mailItem.HTMLBody = html;
+            mailItem.Display(false);
         }
 
         public void UpdateCollectionView()
