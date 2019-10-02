@@ -7,9 +7,9 @@ using Octokit;
 
 namespace ApiReviewList.Reports
 {
-    internal static class ApiReviewNotes
+    internal sealed class ApiReviewFeedback
     {
-        public static async Task<IReadOnlyList<ApiReviewFeedback>> GetFeedbackAsync(DateTimeOffset date)
+        public static async Task<IReadOnlyList<ApiReviewFeedback>> GetAsync(DateTimeOffset date)
         {
             static string GetApiStatus(Issue issue)
             {
@@ -128,10 +128,8 @@ namespace ApiReviewList.Reports
             results.Sort((x, y) => x.FeedbackDateTime.CompareTo(y.FeedbackDateTime));
             return results;
         }
-    }
 
-    internal sealed class ApiReviewFeedback
-    {
+
         public string Owner { get; set; }
         public string Repo { get; set; }
         public int IssueNumber { get; set; }

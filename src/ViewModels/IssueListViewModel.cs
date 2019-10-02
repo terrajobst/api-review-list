@@ -92,7 +92,7 @@ namespace ApiReviewList.ViewModels
             var date = DateTimeOffset.Now.Date;
             var playlistId = "PL1rZQsJPBU2S49OQPjupSJF-qeIEz9_ju";
             var video = await ApiReviewVideo.GetAsync(playlistId, date);
-            var feedbackItems = await ApiReviewNotes.GetFeedbackAsync(date);
+            var feedbackItems = await ApiReviewFeedback.GetAsync(date);
 
             var noteWriter = new StringWriter();
 
