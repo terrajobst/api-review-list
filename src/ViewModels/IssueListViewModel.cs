@@ -93,6 +93,7 @@ namespace ApiReviewList.ViewModels
             var playlistId = "PL1rZQsJPBU2S49OQPjupSJF-qeIEz9_ju";
             var video = await ApiReviewVideo.GetAsync(playlistId, date);
             var feedbackItems = await ApiReviewFeedback.GetAsync(date);
+            var github = GitHubClientFactory.Create();
 
             var noteWriter = new StringWriter();
 
@@ -119,6 +120,12 @@ namespace ApiReviewList.ViewModels
                     var time = $"{offset.Hours}h{offset.Minutes}m{offset.Seconds}s";
                     var videoUrl = $"https://www.youtube.com/watch?v={video.Id}&t={time}";
                     noteWriter.Write($" | [Video]({videoUrl})");
+
+                    if (f.VideoUrl == null && f.FeedbackId != null)
+                    {
+                        var feedbackWithVideo = $"[Video]({videoUrl})\n\n{f.FeedbackMarkdown}";
+                        await github.Issue.Comment.Update(f.Owner, f.Repo, f.FeedbackId.Value, feedbackWithVideo);
+                    }
                 }
 
                 noteWriter.WriteLine();
