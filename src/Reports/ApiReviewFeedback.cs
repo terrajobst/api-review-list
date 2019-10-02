@@ -79,8 +79,6 @@ namespace ApiReviewList.Reports
                 return title;
             }
 
-            var user = "terrajobst";
-
             var reposText = ConfigurationManager.AppSettings["Repos"];
             var repos = OrgAndRepo.ParseList(reposText).ToArray();
 
@@ -106,20 +104,26 @@ namespace ApiReviewList.Reports
                     if (!HasApiEvent(events, date, out var eventDateTime))
                         continue;
 
+                    var title = FixTitle(issue.Title);
                     var comments = await github.Issue.Comment.GetAllForIssue(org, repo, issue.Number);
-                    var latestFeedback = comments.LastOrDefault(c => c.User.Login == user);
-                    var url = latestFeedback?.HtmlUrl ?? issue.HtmlUrl;
+                    var eventComment = comments.Where(c => c.CreatedAt.Date == date)
+                                               .Select(c => (comment: c, within: Math.Abs((c.CreatedAt - eventDateTime).TotalSeconds)))
+                                               .Where(c => c.within <= 30)
+                                               .OrderBy(c => c.within)
+                                               .Select(c => c.comment)
+                                               .FirstOrDefault();
+                    var url = eventComment?.HtmlUrl ?? issue.HtmlUrl;
 
                     var feedback = new ApiReviewFeedback
                     {
                         Owner = org,
                         Repo = repo,
                         IssueNumber = issue.Number,
-                        IssueTitle = FixTitle(issue.Title),
+                        IssueTitle = title,
                         FeedbackDateTime = eventDateTime,
                         FeedbackUrl = url,
                         FeedbackStatus = status,
-                        FeedbackMarkdown = latestFeedback?.Body
+                        FeedbackMarkdown = eventComment?.Body
                     };
                     results.Add(feedback);
                 }
