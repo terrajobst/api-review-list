@@ -90,14 +90,31 @@ namespace ApiReviewList.ViewModels
         public async void Notes()
         {
             var date = DateTimeOffset.Now.Date;
+            var playlistId = "PL1rZQsJPBU2S49OQPjupSJF-qeIEz9_ju";
+            var video = await ApiReviewVideoInfo.GetLatestAsync(playlistId, date);
+            var feedbackItems = await ApiReviewNotes.GetFeedbackAsync(date);
 
             var noteWriter = new StringWriter();
 
-            foreach (var f in await ApiReviewNotes.GetFeedbackAsync(date))
+            for (int i = 0; i < feedbackItems.Count; i++)
             {
+                var f = feedbackItems[i];
+
                 noteWriter.WriteLine($"## {f.IssueTitle}");
                 noteWriter.WriteLine();
-                noteWriter.WriteLine($"**{f.FeedbackStatus}** | [#{f.Repo}/{f.IssueNumber}]({f.FeedbackUrl})");
+                noteWriter.Write($"**{f.FeedbackStatus}** | [#{f.Repo}/{f.IssueNumber}]({f.FeedbackUrl})");
+
+                if (video != null)
+                {
+                    var pf = i == 0 ? null : feedbackItems[i - 1];
+                    var offset = pf == null ? TimeSpan.Zero : (pf.FeedbackDateTime - video.StartDateTime).Add(TimeSpan.FromSeconds(10));
+
+                    var time = $"{offset.Hours}h{offset.Minutes}m{offset.Seconds}s";
+                    var videoUrl = $"https://www.youtube.com/watch?v={video.Id}&t={time}";
+                    noteWriter.Write($" | [Video]({videoUrl})");
+                }
+
+                noteWriter.WriteLine();
                 noteWriter.WriteLine();
 
                 if (f.FeedbackMarkdown != null)

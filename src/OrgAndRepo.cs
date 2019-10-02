@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ApiReviewList.ViewModels
+namespace ApiReviewList
 {
     internal sealed class OrgAndRepo
     {
