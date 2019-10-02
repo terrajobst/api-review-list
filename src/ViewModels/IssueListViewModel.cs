@@ -91,7 +91,7 @@ namespace ApiReviewList.ViewModels
         {
             var date = DateTimeOffset.Now.Date;
             var playlistId = "PL1rZQsJPBU2S49OQPjupSJF-qeIEz9_ju";
-            var video = await ApiReviewVideoInfo.GetLatestAsync(playlistId, date);
+            var video = await ApiReviewVideo.GetAsync(playlistId, date);
             var feedbackItems = await ApiReviewNotes.GetFeedbackAsync(date);
 
             var noteWriter = new StringWriter();
@@ -99,6 +99,13 @@ namespace ApiReviewList.ViewModels
             for (int i = 0; i < feedbackItems.Count; i++)
             {
                 var f = feedbackItems[i];
+
+                if (video != null)
+                {
+                    var feedbackDuringVideo = video.StartDateTime <= f.FeedbackDateTime && f.FeedbackDateTime <= video.EndDateTime;
+                    if (!feedbackDuringVideo)
+                        continue;
+                }
 
                 noteWriter.WriteLine($"## {f.IssueTitle}");
                 noteWriter.WriteLine();

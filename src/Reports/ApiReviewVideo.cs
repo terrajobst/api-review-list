@@ -7,18 +7,20 @@ using Google.Apis.YouTube.v3;
 
 namespace ApiReviewList.Reports
 {
-    internal sealed class ApiReviewVideoInfo
+    internal sealed class ApiReviewVideo
     {
-        public ApiReviewVideoInfo(string id, DateTimeOffset date)
+        public ApiReviewVideo(string id, DateTimeOffset startDateTime, DateTimeOffset endDateTime)
         {
             Id = id;
-            StartDateTime = date;
+            StartDateTime = startDateTime;
+            EndDateTime = endDateTime;
         }
 
         public string Id { get; }
         public DateTimeOffset StartDateTime { get; }
+        public DateTimeOffset EndDateTime { get; }
 
-        public static async Task<ApiReviewVideoInfo> GetLatestAsync(string playlistId, DateTimeOffset date)
+        public static async Task<ApiReviewVideo> GetAsync(string playlistId, DateTimeOffset date)
         {
             var (clientId, clientSecret) = YouTubeKeyStore.GetApiKey();
 
@@ -70,10 +72,12 @@ namespace ApiReviewList.Reports
                     foreach (var item in videoResponse.Items)
                     {
                         var startTime = item.LiveStreamingDetails.ActualStartTime;
+                        var endTime = item.LiveStreamingDetails.ActualEndTime ?? startTime;
+
                         if (startTime != null)
                         {
                             if (startTime.Value.Date == date)
-                                return new ApiReviewVideoInfo(item.Id, startTime.Value);
+                                return new ApiReviewVideo(item.Id, startTime.Value, endTime.Value);
 
                             if (startTime.Value.Date < date)
                                 return null;
