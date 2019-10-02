@@ -34,7 +34,7 @@ namespace ApiReviewList.Reports
 
             static bool HasApiEvent(IEnumerable<EventInfo> events, DateTimeOffset date, out DateTimeOffset eventDateTime)
             {
-                foreach (var e in events)
+                foreach (var e in events.OrderByDescending(e => e.CreatedAt))
                 {
                     if (e.CreatedAt.Date == date)
                     {
