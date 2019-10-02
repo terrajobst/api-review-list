@@ -92,6 +92,7 @@
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   ItemsSource="{Binding Issues}"
+                  SelectedItem="{Binding SelectedIssue}"
                   MouseDoubleClick="DataGrid_MouseDoubleClick"
                   PreviewKeyDown="DataGrid_KeyDown">
             <DataGrid.Resources>

@@ -26,6 +26,7 @@ namespace ApiReviewList.ViewModels
         private string _countStatus;
         private string _timeStatus;
         private string _filter;
+        private IssueViewModel _selectedIssue;
 
         public IssueListViewModel()
         {
@@ -231,6 +232,19 @@ namespace ApiReviewList.ViewModels
                 if (_issues != value)
                 {
                     _issues = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public IssueViewModel SelectedIssue
+        {
+            get => _selectedIssue;
+            set
+            {
+                if (_selectedIssue != value)
+                {
+                    _selectedIssue = value;
                     OnPropertyChanged();
                 }
             }
