@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Google.Apis.YouTube.v3.Data;
 using Markdig;
 using Microsoft.Office.Interop.Outlook;
 using Octokit;
