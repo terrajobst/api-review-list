@@ -40,6 +40,10 @@ namespace ApiReviewList.Reports
                     {
                         eventDateTime = e.CreatedAt;
 
+                        // Workaround for https://github.com/octokit/octokit.net/issues/2023
+                        if (e.Event.StringValue == "transferred")
+                            continue;
+
                         switch (e.Event.Value)
                         {
                             case EventInfoState.Labeled:
@@ -64,6 +68,8 @@ namespace ApiReviewList.Reports
                     "[api proposal]",
                     "api:",
                     "[api]",
+                    "proposal:",
+                    "[proposal]",
                     "feature:",
                     "feature request:",
                     "[feature]",
@@ -130,7 +136,7 @@ namespace ApiReviewList.Reports
                     var comments = await github.Issue.Comment.GetAllForIssue(org, repo, issue.Number);
                     var eventComment = comments.Where(c => c.CreatedAt.Date == date)
                                                .Select(c => (comment: c, within: Math.Abs((c.CreatedAt - feedbackDateTime).TotalSeconds)))
-                                               .Where(c => c.within <= 30)
+                                               .Where(c => c.within <= 120)
                                                .OrderBy(c => c.within)
                                                .Select(c => c.comment)
                                                .FirstOrDefault();

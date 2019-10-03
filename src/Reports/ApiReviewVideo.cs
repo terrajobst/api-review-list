@@ -42,6 +42,9 @@ namespace ApiReviewList.Reports
 
                     foreach (var item in videoResponse.Items)
                     {
+                        if (item.LiveStreamingDetails == null)
+                            continue;
+
                         var startTime = item.LiveStreamingDetails.ActualStartTime;
                         var endTime = item.LiveStreamingDetails.ActualEndTime ?? startTime;
 
