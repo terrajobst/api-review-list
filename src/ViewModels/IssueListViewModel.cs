@@ -2,16 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
-using System.IO;
 using System.Linq;
 using System.Windows.Data;
 using System.Windows.Input;
 
 using ApiReviewList.Reports;
-
-using Markdig;
-
-using Microsoft.Office.Interop.Outlook;
 
 using Octokit;
 
@@ -91,63 +86,11 @@ namespace ApiReviewList.ViewModels
         public async void Notes()
         {
             var date = DateTimeOffset.Now.Date;
-            var playlistId = "PL1rZQsJPBU2S49OQPjupSJF-qeIEz9_ju";
-            var video = await ApiReviewVideo.GetAsync(playlistId, date);
-            var feedbackItems = await ApiReviewFeedback.GetAsync(date);
-            var github = GitHubClientFactory.Create();
-
-            var noteWriter = new StringWriter();
-
-            for (int i = 0; i < feedbackItems.Count; i++)
-            {
-                var f = feedbackItems[i];
-
-                if (video != null)
-                {
-                    var feedbackDuringVideo = video.StartDateTime <= f.FeedbackDateTime && f.FeedbackDateTime <= video.EndDateTime;
-                    if (!feedbackDuringVideo)
-                        continue;
-                }
-
-                noteWriter.WriteLine($"## {f.IssueTitle}");
-                noteWriter.WriteLine();
-                noteWriter.Write($"**{f.FeedbackStatus}** | [#{f.Repo}/{f.IssueNumber}]({f.FeedbackUrl})");
-
-                if (video != null)
-                {
-                    var pf = i == 0 ? null : feedbackItems[i - 1];
-                    var offset = pf == null ? TimeSpan.Zero : (pf.FeedbackDateTime - video.StartDateTime).Add(TimeSpan.FromSeconds(10));
-
-                    var time = $"{offset.Hours}h{offset.Minutes}m{offset.Seconds}s";
-                    var videoUrl = $"https://www.youtube.com/watch?v={video.Id}&t={time}";
-                    noteWriter.Write($" | [Video]({videoUrl})");
-
-                    if (f.VideoUrl == null && f.FeedbackId != null)
-                    {
-                        var feedbackWithVideo = $"[Video]({videoUrl})\n\n{f.FeedbackMarkdown}";
-                        await github.Issue.Comment.Update(f.Owner, f.Repo, f.FeedbackId.Value, feedbackWithVideo);
-                    }
-                }
-
-                noteWriter.WriteLine();
-                noteWriter.WriteLine();
-
-                if (f.FeedbackMarkdown != null)
-                {
-                    noteWriter.Write(f.FeedbackMarkdown);
-                    noteWriter.WriteLine();
-                }
-            }
-
-            var markdown = noteWriter.ToString();
-            var html = Markdown.ToHtml(markdown);
-
-            var outlookApp = new Microsoft.Office.Interop.Outlook.Application();
-            var mailItem = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
-            mailItem.To = "FXDR";
-            mailItem.Subject = $"API Review Notes {date.ToString("d")}";
-            mailItem.HTMLBody = html;
-            mailItem.Display(false);
+            var summary = await ApiReviewSummary.GetAsync(date);
+            await summary.UpdateVideoDescriptionAsync();
+            await summary.UpdateCommentsAsync();
+            await summary.CommitAsync();
+            summary.SendEmail();
         }
 
         public void UpdateCollectionView()
