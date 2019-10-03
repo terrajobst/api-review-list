@@ -15,7 +15,7 @@ namespace ApiReviewList.Reports
             {
                 var approved = issue.Labels.Any(l => l.Name == "api-approved");
                 var needsWork = issue.Labels.Any(l => l.Name == "api-needs-work");
-                var isRejected = issue.Labels.Any(l => l.Name.StartsWith("api-")) &&
+                var isRejected = issue.Labels.Any(l => l.Name == "api-ready-for-review") &&
                                  issue.State.Value == ItemState.Closed;
 
                 var isApi = approved || needsWork || isRejected;
@@ -32,32 +32,33 @@ namespace ApiReviewList.Reports
                 return "Needs Work";
             }
 
-            static bool HasApiEvent(IEnumerable<EventInfo> events, DateTimeOffset date, out DateTimeOffset eventDateTime)
+            static bool IsApiEvent(EventInfo eventInfo)
             {
-                foreach (var e in events.OrderByDescending(e => e.CreatedAt))
+                // Workaround for https://github.com/octokit/octokit.net/issues/2023
+                if (eventInfo.Event.StringValue == "transferred")
+                    return false;
+
+                switch (eventInfo.Event.Value)
                 {
-                    if (e.CreatedAt.Date == date)
-                    {
-                        eventDateTime = e.CreatedAt;
-
-                        // Workaround for https://github.com/octokit/octokit.net/issues/2023
-                        if (e.Event.StringValue == "transferred")
-                            continue;
-
-                        switch (e.Event.Value)
-                        {
-                            case EventInfoState.Labeled:
-                                if (e.Label.Name == "api-approved" || e.Label.Name == "api-needs-work")
-                                    return true;
-                                break;
-                            case EventInfoState.Closed:
-                                return true;
-                        }
-                    }
+                    case EventInfoState.Labeled:
+                        if (eventInfo.Label.Name == "api-approved" || eventInfo.Label.Name == "api-needs-work")
+                            return true;
+                        break;
+                    case EventInfoState.Closed:
+                        return true;
                 }
 
-                eventDateTime = default;
                 return false;
+            }
+
+            static IEnumerable<EventInfo> GetApiEvents(IEnumerable<EventInfo> events, DateTimeOffset date)
+            {
+                foreach (var eventGroup in events.Where(e => e.CreatedAt.Date == date && IsApiEvent(e))
+                                                 .GroupBy(e => e.CreatedAt.Date))
+                {
+                    var latest = eventGroup.OrderBy(e => e.CreatedAt).Last();
+                    yield return latest;
+                }
             }
 
             static string FixTitle(string title)
@@ -129,35 +130,37 @@ namespace ApiReviewList.Reports
                         continue;
 
                     var events = await github.Issue.Events.GetAllForIssue(org, repo, issue.Number);
-                    if (!HasApiEvent(events, date, out var feedbackDateTime))
-                        continue;
 
-                    var title = FixTitle(issue.Title);
-                    var comments = await github.Issue.Comment.GetAllForIssue(org, repo, issue.Number);
-                    var eventComment = comments.Where(c => c.CreatedAt.Date == date)
-                                               .Select(c => (comment: c, within: Math.Abs((c.CreatedAt - feedbackDateTime).TotalSeconds)))
-                                               .Where(c => c.within <= 120)
-                                               .OrderBy(c => c.within)
-                                               .Select(c => c.comment)
-                                               .FirstOrDefault();
-                    var feedbackId = eventComment?.Id;
-                    var feedbackUrl = eventComment?.HtmlUrl ?? issue.HtmlUrl;
-                    var (videoUrl, feedbackMarkdown) = ParseFeedback(eventComment?.Body);
-
-                    var feedback = new ApiReviewFeedback
+                    foreach (var apiEvent in GetApiEvents(events, date))
                     {
-                        Owner = org,
-                        Repo = repo,
-                        IssueNumber = issue.Number,
-                        IssueTitle = title,
-                        FeedbackId = feedbackId,
-                        FeedbackDateTime = feedbackDateTime,
-                        FeedbackUrl = feedbackUrl,
-                        FeedbackStatus = status,
-                        FeedbackMarkdown = feedbackMarkdown,
-                        VideoUrl = videoUrl
-                    };
-                    results.Add(feedback);
+                        var title = FixTitle(issue.Title);
+                        var feedbackDateTime = apiEvent.CreatedAt;
+                        var comments = await github.Issue.Comment.GetAllForIssue(org, repo, issue.Number);
+                        var eventComment = comments.Where(c => c.User.Login == apiEvent.Actor.Login)
+                                                   .Select(c => (comment: c, within: Math.Abs((c.CreatedAt - feedbackDateTime).TotalSeconds)))
+                                                   .Where(c => c.within <= TimeSpan.FromMinutes(15).TotalSeconds)
+                                                   .OrderBy(c => c.within)
+                                                   .Select(c => c.comment)
+                                                   .FirstOrDefault();
+                        var feedbackId = eventComment?.Id;
+                        var feedbackUrl = eventComment?.HtmlUrl ?? issue.HtmlUrl;
+                        var (videoUrl, feedbackMarkdown) = ParseFeedback(eventComment?.Body);
+
+                        var feedback = new ApiReviewFeedback
+                        {
+                            Owner = org,
+                            Repo = repo,
+                            IssueNumber = issue.Number,
+                            IssueTitle = title,
+                            FeedbackId = feedbackId,
+                            FeedbackDateTime = feedbackDateTime,
+                            FeedbackUrl = feedbackUrl,
+                            FeedbackStatus = status,
+                            FeedbackMarkdown = feedbackMarkdown,
+                            VideoUrl = videoUrl
+                        };
+                        results.Add(feedback);
+                    }
                 }
             }
 
