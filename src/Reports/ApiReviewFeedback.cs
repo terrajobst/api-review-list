@@ -13,17 +13,17 @@ namespace ApiReviewList.Reports
         {
             static string GetApiStatus(Issue issue)
             {
-                var approved = issue.Labels.Any(l => l.Name == "api-approved");
+                var isReadyForReview = issue.Labels.Any(l => l.Name == "api-ready-for-review");
+                var isApproved = issue.Labels.Any(l => l.Name == "api-approved");
                 var needsWork = issue.Labels.Any(l => l.Name == "api-needs-work");
-                var isRejected = issue.Labels.Any(l => l.Name == "api-ready-for-review") &&
-                                 issue.State.Value == ItemState.Closed;
+                var isRejected = isReadyForReview && issue.State.Value == ItemState.Closed;
 
-                var isApi = approved || needsWork || isRejected;
+                var isApi = isApproved || needsWork || isRejected;
 
                 if (!isApi)
                     return null;
 
-                if (approved)
+                if (isApproved)
                     return "Approved";
 
                 if (isRejected)
