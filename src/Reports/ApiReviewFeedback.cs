@@ -32,6 +32,20 @@ namespace ApiReviewList.Reports
                 return "Needs Work";
             }
 
+            static bool WasEverReadyForReview(Issue issue, IEnumerable<EventInfo> events)
+            {
+                if (issue.Labels.Any(l => l.Name == "api-ready-for-review"))
+                    return true;
+
+                foreach (var eventInfo in events)
+                {
+                    if (eventInfo.Event.StringValue == "labeled" && eventInfo.Label.Name == "api-ready-for-review")
+                        return true;
+                }
+
+                return false;
+            }
+
             static bool IsApiEvent(EventInfo eventInfo)
             {
                 // We need to work around unsupported enum values:
@@ -132,6 +146,9 @@ namespace ApiReviewList.Reports
                         continue;
 
                     var events = await github.Issue.Events.GetAllForIssue(org, repo, issue.Number);
+
+                    if (!WasEverReadyForReview(issue, events))
+                        continue;
 
                     foreach (var apiEvent in GetApiEvents(events, date))
                     {
