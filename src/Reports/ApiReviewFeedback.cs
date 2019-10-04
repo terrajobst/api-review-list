@@ -34,17 +34,19 @@ namespace ApiReviewList.Reports
 
             static bool IsApiEvent(EventInfo eventInfo)
             {
-                // Workaround for https://github.com/octokit/octokit.net/issues/2023
-                if (eventInfo.Event.StringValue == "transferred")
-                    return false;
+                // We need to work around unsupported enum values:
+                // - https://github.com/octokit/octokit.net/issues/2023
+                // - https://github.com/octokit/octokit.net/issues/2025
+                //
+                // which will cause Value to throw an exception.
 
-                switch (eventInfo.Event.Value)
+                switch (eventInfo.Event.StringValue)
                 {
-                    case EventInfoState.Labeled:
+                    case "labeled":
                         if (eventInfo.Label.Name == "api-approved" || eventInfo.Label.Name == "api-needs-work")
                             return true;
                         break;
-                    case EventInfoState.Closed:
+                    case "closed":
                         return true;
                 }
 
