@@ -39,7 +39,7 @@ namespace ApiReviewList.Reports
 
                 foreach (var eventInfo in events)
                 {
-                    if (eventInfo.Event.StringValue == "labeled" && eventInfo.Label.Name == "api-ready-for-review")
+                    if (eventInfo.Label?.Name == "api-ready-for-review")
                         return true;
                 }
 
