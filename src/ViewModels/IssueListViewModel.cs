@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Linq;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -91,6 +92,7 @@ namespace ApiReviewList.ViewModels
             await summary.UpdateCommentsAsync();
             await summary.CommitAsync();
             summary.SendEmail();
+            MessageBox.Show("Notes sent.", "API Review List", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public void UpdateCollectionView()
