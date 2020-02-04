@@ -19,5 +19,10 @@ namespace ApiReviewList.Reports
                 return $"https://www.youtube.com/watch?v={Video.Id}&t={timeCodeText}";                
             }
         }
+
+        public override string ToString()
+        {
+            return $"{Feedback.IssueNumber} - {Feedback.IssueTitle} @ {VideoTimeCode}";
+        }
     }
 }
