@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using Octokit;
 
 namespace ApiReviewList
@@ -15,8 +16,10 @@ namespace ApiReviewList
         public static GitHubClient Create(string apiKey)
         {
             var productInformation = new ProductHeaderValue("APIReviewList");
-            var client = new GitHubClient(productInformation);
-            client.Credentials = new Credentials(apiKey);
+            var client = new GitHubClient(productInformation)
+            {
+                Credentials = new Credentials(apiKey)
+            };
             return client;
         }
 
@@ -25,8 +28,10 @@ namespace ApiReviewList
             try
             {
                 var client = Create(apiKey);
-                var request = new IssueRequest();
-                request.Since = DateTimeOffset.Now;
+                var request = new IssueRequest
+                {
+                    Since = DateTimeOffset.Now
+                };
                 await client.Issue.GetAllForCurrent(request);
             }
             catch (Exception)

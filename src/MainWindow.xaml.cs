@@ -4,7 +4,6 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
-using ApiReviewList.Reports;
 using ApiReviewList.ViewModels;
 
 namespace ApiReviewList

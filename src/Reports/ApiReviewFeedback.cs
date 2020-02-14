@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Octokit;
 
 namespace ApiReviewList.Reports
@@ -107,10 +108,12 @@ namespace ApiReviewList.Reports
 
             foreach (var (org, repo) in repos)
             {
-                var request = new RepositoryIssueRequest();
-                request.Filter = IssueFilter.All;
-                request.State = ItemStateFilter.All;
-                request.Since = date;
+                var request = new RepositoryIssueRequest
+                {
+                    Filter = IssueFilter.All,
+                    State = ItemStateFilter.All,
+                    Since = date
+                };
 
                 var issues = await github.Issue.GetAllForRepository(org, repo, request);
 

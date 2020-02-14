@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Markdig;
+
 using Microsoft.Office.Interop.Outlook;
+
 using Octokit;
 
 namespace ApiReviewList.Reports
@@ -161,13 +164,17 @@ namespace ApiReviewList.Reports
 
             if (file == null)
             {
-                var newTreeItem = new NewTreeItem();
-                newTreeItem.Mode = "100644";
-                newTreeItem.Path = path;
-                newTreeItem.Content = markdown;
+                var newTreeItem = new NewTreeItem
+                {
+                    Mode = "100644",
+                    Path = path,
+                    Content = markdown
+                };
 
-                var newTree = new NewTree();
-                newTree.BaseTree = latestCommit.Tree.Sha;
+                var newTree = new NewTree
+                {
+                    BaseTree = latestCommit.Tree.Sha
+                };
                 newTree.Tree.Add(newTreeItem);
 
                 var newTreeResponse = await github.Git.Tree.Create(owner, repo, newTree);

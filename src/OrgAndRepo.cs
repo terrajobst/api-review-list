@@ -19,7 +19,7 @@ namespace ApiReviewList
             var parts = text.Split('/');
             if (parts.Length != 2)
                 return null;
-            
+
             var org = parts[0].Trim();
             var repo = parts[1].Trim();
             return new OrgAndRepo(org, repo);
@@ -31,7 +31,10 @@ namespace ApiReviewList
             return elements.Select(Parse).Where(r => r != null);
         }
 
-        public override string ToString() => $"{OrgName}/{RepoName}";
+        public override string ToString()
+        {
+            return $"{OrgName}/{RepoName}";
+        }
 
         public void Deconstruct(out string orgName, out string repoName)
         {

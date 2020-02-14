@@ -44,9 +44,11 @@ namespace ApiReviewList.ViewModels
 
             foreach (var (org, repo) in repos)
             {
-                var request = new RepositoryIssueRequest();
-                request.Filter = IssueFilter.All;
-                request.State = ItemStateFilter.Open;
+                var request = new RepositoryIssueRequest
+                {
+                    Filter = IssueFilter.All,
+                    State = ItemStateFilter.Open
+                };
                 request.Labels.Add("api-ready-for-review");
 
                 var issues = await github.Issue.GetAllForRepository(org, repo, request);

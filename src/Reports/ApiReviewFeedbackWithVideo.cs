@@ -16,7 +16,7 @@ namespace ApiReviewList.Reports
                     return null;
 
                 var timeCodeText = $"{VideoTimeCode.Hours}h{VideoTimeCode.Minutes}m{VideoTimeCode.Seconds}s";
-                return $"https://www.youtube.com/watch?v={Video.Id}&t={timeCodeText}";                
+                return $"https://www.youtube.com/watch?v={Video.Id}&t={timeCodeText}";
             }
         }
 

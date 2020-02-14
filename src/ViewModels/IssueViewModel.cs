@@ -47,8 +47,14 @@ namespace ApiReviewList.ViewModels
 
         public ReadOnlyCollection<LabelViewModel> Labels { get; }
 
-        public string GetHtmlLink() => GitHubIssueHelpers.GetHtmlLink(Org, Repo, Id, Url, Title);
+        public string GetHtmlLink()
+        {
+            return GitHubIssueHelpers.GetHtmlLink(Org, Repo, Id, Url, Title);
+        }
 
-        public string GetMarkdownLink() => GitHubIssueHelpers.GetMarkdownLink(Org, Repo, Id, Url, Title);
+        public string GetMarkdownLink()
+        {
+            return GitHubIssueHelpers.GetMarkdownLink(Org, Repo, Id, Url, Title);
+        }
     }
 }

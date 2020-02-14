@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Media;
+
 using Octokit;
 
 namespace ApiReviewList.ViewModels
