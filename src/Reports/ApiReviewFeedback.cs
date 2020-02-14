@@ -77,31 +77,6 @@ namespace ApiReviewList.Reports
                 }
             }
 
-            static string FixTitle(string title)
-            {
-                var prefixes = new[]
-                {
-                    "api proposal:",
-                    "[api proposal]",
-                    "api:",
-                    "[api]",
-                    "proposal:",
-                    "[proposal]",
-                    "feature:",
-                    "feature request:",
-                    "[feature]",
-                    "[feature request]"
-                };
-
-                foreach (var prefix in prefixes)
-                {
-                    if (title.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                        title = title.Substring(prefix.Length).Trim();
-                }
-
-                return title;
-            }
-
             static (string VideoLink, string Markdown) ParseFeedback(string body)
             {
                 if (body == null)
@@ -152,7 +127,7 @@ namespace ApiReviewList.Reports
 
                     foreach (var apiEvent in GetApiEvents(events, date))
                     {
-                        var title = FixTitle(issue.Title);
+                        var title = GitHubIssueHelpers.FixTitle(issue.Title);
                         var feedbackDateTime = apiEvent.CreatedAt;
                         var comments = await github.Issue.Comment.GetAllForIssue(org, repo, issue.Number);
                         var eventComment = comments.Where(c => c.User.Login == apiEvent.Actor.Login)

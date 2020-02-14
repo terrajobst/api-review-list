@@ -157,6 +157,15 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <ContextMenu.Items>
+                        <MenuItem Click="CopyMenuItem_Click"
+                                  Header="Copy"
+                                  KeyTipService.KeyTip="Ctrl+C" />
+                    </ContextMenu.Items>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
         </DataGrid>
         <StatusBar Grid.Row="2">
             <StatusBar.ItemsPanel>

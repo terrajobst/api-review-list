@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+
 using Octokit;
 
 namespace ApiReviewList.ViewModels
@@ -26,7 +27,7 @@ namespace ApiReviewList.ViewModels
 
         public string IdFull => $"{Org}/{Repo}#{Model.Number}";
 
-        public string Title => Model.Title;
+        public string Title => GitHubIssueHelpers.FixTitle(Model.Title);
 
         public string Author => Model.User.Login;
 
@@ -40,8 +41,14 @@ namespace ApiReviewList.ViewModels
             }
         }
 
+        public string Url => Model.HtmlUrl;
+
         public MilestoneViewModel Milestone { get; }
 
         public ReadOnlyCollection<LabelViewModel> Labels { get; }
+
+        public string GetHtmlLink() => GitHubIssueHelpers.GetHtmlLink(Org, Repo, Id, Url, Title);
+
+        public string GetMarkdownLink() => GitHubIssueHelpers.GetMarkdownLink(Org, Repo, Id, Url, Title);
     }
 }
