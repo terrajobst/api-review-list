@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -90,6 +91,32 @@ namespace ApiReviewList.ViewModels
         {
             var date = DateTimeOffset.Now.Date;
             var summary = await ApiReviewSummary.GetAsync(date);
+
+            if (!summary.Items.Any())
+            {
+                MessageBox.Show("No issues found.", "API Review List", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine("These issues got reviewed:");
+            sb.AppendLine();
+            foreach (var item in summary.Items)
+            {                
+                sb.Append(item.Feedback.FeedbackStatus);
+                sb.Append(" - ");
+                sb.Append(item.Feedback.IssueTitle);
+                sb.AppendLine();
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("Do you want to send notes?");
+
+            var confirmation = sb.ToString();
+
+            if (MessageBox.Show(confirmation, "API Review List", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return;
+
             await summary.UpdateVideoDescriptionAsync();
             await summary.UpdateCommentsAsync();
             await summary.CommitAsync();
