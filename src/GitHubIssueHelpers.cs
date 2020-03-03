@@ -30,6 +30,26 @@ namespace ApiReviewList
             return title;
         }
 
+        public static string FixLabel(string labelName)
+        {
+            while (true)
+            {
+                var firstColon = labelName.IndexOf(':');
+                if (firstColon < 0)
+                    break;
+
+                var secondColon = labelName.IndexOf(':', firstColon + 1);
+                if (secondColon < 0)
+                    break;
+
+                var emojiStart = firstColon;
+                var emojiLength = secondColon - emojiStart + 1;
+                labelName = labelName.Remove(emojiStart, emojiLength);
+            }
+
+            return labelName.Trim();
+        }
+
         public static string GetMarkdownLink(string owner, string repo, int id, string url, string title)
         {
             var fixedTitle = FixTitle(title);

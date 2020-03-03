@@ -22,7 +22,7 @@ namespace ApiReviewList.ViewModels
 
             Foreground = new SolidColorBrush(foregroundColor);
             Background = new SolidColorBrush(backgroundColor);
-            Text = model.Name;
+            Text = GitHubIssueHelpers.FixLabel(model.Name);
         }
 
         public Brush Foreground { get; }
