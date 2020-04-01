@@ -25,6 +25,8 @@ namespace ApiReviewList.Reports
             var items = await ApiReviewFeedback.GetAsync(date);
 
             var result = new List<ApiReviewFeedbackWithVideo>();
+            var reviewStart = video.StartDateTime;
+            var reviewEnd = video.EndDateTime.AddMinutes(15);
 
             for (var i = 0; i < items.Count; i++)
             {
@@ -32,15 +34,27 @@ namespace ApiReviewList.Reports
 
                 if (video != null)
                 {
-                    var wasDuringVideo = video.StartDateTime <= current.FeedbackDateTime && current.FeedbackDateTime <= video.EndDateTime;
-                    if (!wasDuringVideo)
+                    var wasDuringReview = reviewStart <= current.FeedbackDateTime && current.FeedbackDateTime <= reviewEnd;
+                    if (!wasDuringReview)
                         continue;
                 }
 
                 var previous = i == 0 ? null : items[i - 1];
-                var timeCode = previous == null || video == null
-                                ? TimeSpan.Zero
-                                : (previous.FeedbackDateTime - video.StartDateTime).Add(TimeSpan.FromSeconds(10));
+
+                TimeSpan timeCode;
+
+                if (previous == null || video == null)
+                {
+                    timeCode = TimeSpan.Zero;
+                }
+                else
+                {
+                    timeCode = (previous.FeedbackDateTime - video.StartDateTime).Add(TimeSpan.FromSeconds(10));
+                    var videoDuration = video.EndDateTime - video.StartDateTime;
+                    if (timeCode >= videoDuration)
+                        timeCode = result[i - 1].VideoTimeCode;
+                }
+
 
                 var feedbackWithVideo = new ApiReviewFeedbackWithVideo
                 {
