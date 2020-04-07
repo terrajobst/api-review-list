@@ -14,9 +14,72 @@ namespace ApiReviewList.Reports
 {
     internal sealed class ApiReviewSummary
     {
-        public DateTimeOffset Date { get; set; }
+        public DateTimeOffset Date { get; private set; }
         public ApiReviewVideo Video { get; private set; }
-        public IReadOnlyList<ApiReviewFeedbackWithVideo> Items { get; set; }
+        public IReadOnlyList<ApiReviewFeedbackWithVideo> Items { get; private set; }
+
+        public ApiReviewSummary(DateTimeOffset date, ApiReviewVideo video, IReadOnlyList<ApiReviewFeedback> items)
+        {
+            if (items.Count == 0)
+            {
+                Date = date;
+                Video = video;
+                Items = Array.Empty<ApiReviewFeedbackWithVideo>();
+            }
+            else
+            {
+                var result = new List<ApiReviewFeedbackWithVideo>();
+                var reviewStart = video == null
+                                    ? items.OrderBy(i => i.FeedbackDateTime).Select(i => i.FeedbackDateTime).First()
+                                    : video.StartDateTime;
+
+                var reviewEnd = video == null
+                                    ? items.OrderBy(i => i.FeedbackDateTime).Select(i => i.FeedbackDateTime).Last()
+                                    : video.EndDateTime.AddMinutes(15);
+
+                for (var i = 0; i < items.Count; i++)
+                {
+                    var current = items[i];
+
+                    if (video != null)
+                    {
+                        var wasDuringReview = reviewStart <= current.FeedbackDateTime && current.FeedbackDateTime <= reviewEnd;
+                        if (!wasDuringReview)
+                            continue;
+                    }
+
+                    var previous = i == 0 ? null : items[i - 1];
+
+                    TimeSpan timeCode;
+
+                    if (previous == null || video == null)
+                    {
+                        timeCode = TimeSpan.Zero;
+                    }
+                    else
+                    {
+                        timeCode = (previous.FeedbackDateTime - video.StartDateTime).Add(TimeSpan.FromSeconds(10));
+                        var videoDuration = video.EndDateTime - video.StartDateTime;
+                        if (timeCode >= videoDuration)
+                            timeCode = result[i - 1].VideoTimeCode;
+                    }
+
+
+                    var feedbackWithVideo = new ApiReviewFeedbackWithVideo
+                    {
+                        Feedback = current,
+                        Video = video,
+                        VideoTimeCode = timeCode
+                    };
+
+                    result.Add(feedbackWithVideo);
+                }
+
+                Date = date;
+                Video = video;
+                Items = result;
+            }
+        }
 
         public static async Task<ApiReviewSummary> GetAsync(DateTimeOffset date)
         {
@@ -24,54 +87,7 @@ namespace ApiReviewList.Reports
             var video = await ApiReviewVideo.GetAsync(playlistId, date);
             var items = await ApiReviewFeedback.GetAsync(date);
 
-            var result = new List<ApiReviewFeedbackWithVideo>();
-            var reviewStart = video.StartDateTime;
-            var reviewEnd = video.EndDateTime.AddMinutes(15);
-
-            for (var i = 0; i < items.Count; i++)
-            {
-                var current = items[i];
-
-                if (video != null)
-                {
-                    var wasDuringReview = reviewStart <= current.FeedbackDateTime && current.FeedbackDateTime <= reviewEnd;
-                    if (!wasDuringReview)
-                        continue;
-                }
-
-                var previous = i == 0 ? null : items[i - 1];
-
-                TimeSpan timeCode;
-
-                if (previous == null || video == null)
-                {
-                    timeCode = TimeSpan.Zero;
-                }
-                else
-                {
-                    timeCode = (previous.FeedbackDateTime - video.StartDateTime).Add(TimeSpan.FromSeconds(10));
-                    var videoDuration = video.EndDateTime - video.StartDateTime;
-                    if (timeCode >= videoDuration)
-                        timeCode = result[i - 1].VideoTimeCode;
-                }
-
-
-                var feedbackWithVideo = new ApiReviewFeedbackWithVideo
-                {
-                    Feedback = current,
-                    Video = video,
-                    VideoTimeCode = timeCode
-                };
-
-                result.Add(feedbackWithVideo);
-            }
-
-            return new ApiReviewSummary
-            {
-                Date = date,
-                Video = video,
-                Items = result
-            };
+            return new ApiReviewSummary(date, video, items);
         }
 
         private string GetMarkdown()
