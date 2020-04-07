@@ -24,12 +24,12 @@
             </Grid.RowDefinitions>
             <DatePicker Grid.Row="0"
                         Margin="8"
-                        SelectedDate="{Binding SelectedDate}" />
+                        SelectedDate="{Binding SelectedDate, UpdateSourceTrigger=PropertyChanged}" />
             <Grid Grid.Row="1">
                 <ProgressBar IsIndeterminate="True"
                              Margin="8,0,8,0"
-                             MaxWidth="300"
-                             MinHeight="15"
+                             Width="300"
+                             Height="10"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Center">
                     <ProgressBar.Style>
@@ -48,6 +48,19 @@
                 </ProgressBar>
                 <ScrollViewer HorizontalScrollBarVisibility="Hidden"
                               VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer.Style>
+                        <Style TargetType="ScrollViewer">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLoading}"
+                                             Value="True">
+                                    <Setter Property="Visibility"
+                                            Value="Hidden" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                            <Setter Property="Visibility"
+                                    Value="Visible" />
+                        </Style>
+                    </ScrollViewer.Style>
                     <ItemsControl ItemsSource="{Binding Entries}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

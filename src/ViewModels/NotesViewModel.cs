@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -81,6 +80,9 @@ namespace ApiReviewList.ViewModels
         {
             IsLoading = true;
             var summary = await ApiReviewSummary.GetAsync(SelectedDate);
+            if (summary.Date != SelectedDate)
+                return;
+
             _originalSummary = summary;
             Entries = summary.Items.Select(i => new NotesEntryViewModel(i)).ToArray();
             IsLoading = false;
