@@ -87,10 +87,7 @@ namespace ApiReviewList.ViewModels
 
         public async void Notes()
         {
-            var date = DateTimeOffset.Now.Date;
-            var summary = await ApiReviewSummary.GetAsync(date);
-
-            var dialog = new NotesDialog(summary);
+            var dialog = new NotesDialog();
             dialog.Owner = System.Windows.Application.Current.MainWindow;
             dialog.ShowDialog();
         }

@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,15 +10,56 @@ namespace ApiReviewList.ViewModels
 {
     internal sealed class NotesViewModel : ViewModel
     {
-        private readonly ApiReviewSummary _originalSummary;
+        private bool _isLoading;
+        private DateTime _selectedDate;
+        private IReadOnlyCollection<NotesEntryViewModel> _entries;
 
-        public NotesViewModel(ApiReviewSummary summary)
+        private ApiReviewSummary _originalSummary;
+
+        public NotesViewModel()
         {
-            _originalSummary = summary;
-            Entries = summary.Items.Select(i => new NotesEntryViewModel(i)).ToArray();
+            SelectedDate = DateTime.Now.Date;
         }
 
-        public IReadOnlyCollection<NotesEntryViewModel> Entries { get; }
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set
+            {
+                if (_isLoading != value)
+                {
+                    _isLoading = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public DateTime SelectedDate
+        {
+            get => _selectedDate;
+            set
+            {
+                if (_selectedDate != value)
+                {
+                    _selectedDate = value;
+                    OnPropertyChanged();
+                    UpdateSummary();
+                }
+            }
+        }
+
+        public IReadOnlyCollection<NotesEntryViewModel> Entries
+        {
+            get => _entries;
+            set
+            {
+                if (_entries != value)
+                {
+                    _entries = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public ApiReviewSummary GetSelectedSummary()
         {
@@ -32,7 +74,16 @@ namespace ApiReviewList.ViewModels
             await summary.UpdateVideoDescriptionAsync();
             await summary.UpdateCommentsAsync();
             await summary.CommitAsync();
-            summary.SendEmail();            
+            summary.SendEmail();
+        }
+
+        private async void UpdateSummary()
+        {
+            IsLoading = true;
+            var summary = await ApiReviewSummary.GetAsync(SelectedDate);
+            _originalSummary = summary;
+            Entries = summary.Items.Select(i => new NotesEntryViewModel(i)).ToArray();
+            IsLoading = false;
         }
     }
 }

@@ -9,11 +9,11 @@ namespace ApiReviewList
 {
     internal partial class NotesDialog : Window
     {
-        public NotesDialog(ApiReviewSummary summary)
+        public NotesDialog()
         {
             InitializeComponent();
 
-            DataContext = new NotesViewModel(summary);
+            DataContext = new NotesViewModel();
         }
 
         protected override async void OnClosed(EventArgs e)
