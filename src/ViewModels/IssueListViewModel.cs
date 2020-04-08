@@ -85,7 +85,7 @@ namespace ApiReviewList.ViewModels
             UpdateCollectionView();
         }
 
-        public async void Notes()
+        public void Notes()
         {
             var dialog = new NotesDialog();
             dialog.Owner = System.Windows.Application.Current.MainWindow;
