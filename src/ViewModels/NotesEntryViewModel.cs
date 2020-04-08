@@ -6,12 +6,14 @@ namespace ApiReviewList.ViewModels
     {
         private bool _isChecked;
 
-        public NotesEntryViewModel(ApiReviewFeedbackWithVideo model)
+        public NotesEntryViewModel(NotesViewModel owner, ApiReviewFeedbackWithVideo model)
         {
+            Owner = owner;
             Model = model;
             _isChecked = true;
         }
 
+        public NotesViewModel Owner { get; }
         public ApiReviewFeedbackWithVideo Model { get; }
 
         public bool IsChecked
@@ -23,6 +25,7 @@ namespace ApiReviewList.ViewModels
                 {
                     _isChecked = value;
                     OnPropertyChanged();
+                    Owner.UpdateCanSendNotes();
                 }
             }
         }

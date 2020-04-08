@@ -9,6 +9,7 @@ namespace ApiReviewList.ViewModels
 {
     internal sealed class NotesViewModel : ViewModel
     {
+        private bool _canSendNotes;
         private bool _isLoading;
         private DateTime _selectedDate;
         private IReadOnlyCollection<NotesEntryViewModel> _entries;
@@ -20,6 +21,19 @@ namespace ApiReviewList.ViewModels
             SelectedDate = DateTime.Now.Date;
         }
 
+        public bool CanSendNotes
+        {
+            get => _canSendNotes;
+            set
+            {
+                if (_canSendNotes != value)
+                {
+                    _canSendNotes = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public bool IsLoading
         {
             get => _isLoading;
@@ -29,6 +43,7 @@ namespace ApiReviewList.ViewModels
                 {
                     _isLoading = value;
                     OnPropertyChanged();
+                    UpdateCanSendNotes();
                 }
             }
         }
@@ -42,7 +57,7 @@ namespace ApiReviewList.ViewModels
                 {
                     _selectedDate = value;
                     OnPropertyChanged();
-                    UpdateSummary();
+                    UpdateEntries();
                 }
             }
         }
@@ -56,6 +71,7 @@ namespace ApiReviewList.ViewModels
                 {
                     _entries = value;
                     OnPropertyChanged();
+                    UpdateCanSendNotes();
                 }
             }
         }
@@ -76,7 +92,7 @@ namespace ApiReviewList.ViewModels
             summary.SendEmail();
         }
 
-        private async void UpdateSummary()
+        private async void UpdateEntries()
         {
             IsLoading = true;
             var summary = await ApiReviewSummary.GetAsync(SelectedDate);
@@ -84,8 +100,13 @@ namespace ApiReviewList.ViewModels
                 return;
 
             _originalSummary = summary;
-            Entries = summary.Items.Select(i => new NotesEntryViewModel(i)).ToArray();
+            Entries = summary.Items.Select(i => new NotesEntryViewModel(this, i)).ToArray();
             IsLoading = false;
+        }
+
+        public void UpdateCanSendNotes()
+        {
+            CanSendNotes = !IsLoading && Entries.Count(e => e.IsChecked) > 0;
         }
     }
 }

@@ -80,6 +80,7 @@
             <Button MinWidth="85"
                     IsDefault="True"
                     Content="Send Notes"
+                    IsEnabled="{Binding CanSendNotes}"
                     Click="SendButton_Click" />
             <Button MinWidth="85"
                     Margin="8,0,0,0"
