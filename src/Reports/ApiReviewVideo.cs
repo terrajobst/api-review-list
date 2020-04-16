@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+
+using Google.Apis.YouTube.v3.Data;
 
 namespace ApiReviewList.Reports
 {
@@ -20,9 +24,7 @@ namespace ApiReviewList.Reports
         {
             var service = await YouTubeServiceFactory.CreateAsync();
 
-            var channelsListRequest = service.Channels.List("contentDetails");
-            channelsListRequest.Mine = true;
-
+            var result = new List<Video>();
             var nextPageToken = "";
 
             while (nextPageToken != null)
@@ -38,28 +40,23 @@ namespace ApiReviewList.Reports
                     var videoRequest = service.Videos.List("liveStreamingDetails");
                     videoRequest.Id = playlistItem.ContentDetails.VideoId;
                     var videoResponse = await videoRequest.ExecuteAsync();
-
-
-                    foreach (var item in videoResponse.Items)
-                    {
-                        if (item.LiveStreamingDetails == null)
-                            continue;
-
-                        var startTime = item.LiveStreamingDetails.ActualStartTime;
-                        var endTime = item.LiveStreamingDetails.ActualEndTime ?? startTime;
-
-                        if (startTime != null)
-                        {
-                            if (startTime.Value.Date == date)
-                                return new ApiReviewVideo(item.Id, startTime.Value, endTime.Value);
-
-                            if (startTime.Value.Date < date)
-                                return null;
-                        }
-                    }
+                    result.AddRange(videoResponse.Items);
                 }
 
                 nextPageToken = response.NextPageToken;
+            }
+
+            var video = result.Where(v => v.LiveStreamingDetails != null &&
+                                     v.LiveStreamingDetails.ActualStartTime != null &&
+                                     v.LiveStreamingDetails.ActualEndTime != null)
+                              .OrderByDescending(v => v.LiveStreamingDetails.ActualStartTime.Value)
+                              .FirstOrDefault(v => v.LiveStreamingDetails.ActualEndTime.Value.Date == date);
+
+            if (video != null)
+            {
+                return new ApiReviewVideo(video.Id,
+                                          video.LiveStreamingDetails.ActualStartTime.Value,
+                                          video.LiveStreamingDetails.ActualEndTime.Value);
             }
 
             return null;
