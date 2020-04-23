@@ -35,12 +35,14 @@ namespace ApiReviewList.Reports
 
             static bool WasEverReadyForReview(Issue issue, IEnumerable<EventInfo> events)
             {
-                if (issue.Labels.Any(l => l.Name == "api-ready-for-review"))
+                if (issue.Labels.Any(l => l.Name == "api-ready-for-review" ||
+                                          l.Name == "api-approved"))
                     return true;
 
                 foreach (var eventInfo in events)
                 {
-                    if (eventInfo.Label?.Name == "api-ready-for-review")
+                    if (eventInfo.Label?.Name == "api-ready-for-review" ||
+                        eventInfo.Label?.Name == "api-approved")
                         return true;
                 }
 
