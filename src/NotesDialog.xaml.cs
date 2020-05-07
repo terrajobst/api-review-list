@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 using System.Windows;
-
+using System.Windows.Navigation;
 using ApiReviewList.Reports;
 using ApiReviewList.ViewModels;
 
@@ -38,6 +39,12 @@ namespace ApiReviewList
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Shell.Execute(e.Uri.ToString());
+            e.Handled = true;
         }
     }
 }

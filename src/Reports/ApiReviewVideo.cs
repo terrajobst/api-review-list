@@ -9,16 +9,21 @@ namespace ApiReviewList.Reports
 {
     internal sealed class ApiReviewVideo
     {
-        public ApiReviewVideo(string id, DateTimeOffset startDateTime, DateTimeOffset endDateTime)
+        public ApiReviewVideo(string id, DateTimeOffset startDateTime, DateTimeOffset endDateTime, string title, string thumbnailUrl)
         {
             Id = id;
             StartDateTime = startDateTime;
             EndDateTime = endDateTime;
+            Title = title;
+            ThumbnailUrl = thumbnailUrl;
         }
 
+        public string Url => $"https://www.youtube.com/watch?v={Id}";
         public string Id { get; }
         public DateTimeOffset StartDateTime { get; }
         public DateTimeOffset EndDateTime { get; }
+        public string Title { get; }
+        public string ThumbnailUrl { get; }
 
         public static async Task<ApiReviewVideo> GetAsync(string playlistId, DateTimeOffset date)
         {
@@ -37,7 +42,7 @@ namespace ApiReviewList.Reports
 
                 foreach (var playlistItem in response.Items)
                 {
-                    var videoRequest = service.Videos.List("liveStreamingDetails");
+                    var videoRequest = service.Videos.List("snippet,liveStreamingDetails");
                     videoRequest.Id = playlistItem.ContentDetails.VideoId;
                     var videoResponse = await videoRequest.ExecuteAsync();
                     result.AddRange(videoResponse.Items);
@@ -56,7 +61,9 @@ namespace ApiReviewList.Reports
             {
                 return new ApiReviewVideo(video.Id,
                                           video.LiveStreamingDetails.ActualStartTime.Value,
-                                          video.LiveStreamingDetails.ActualEndTime.Value);
+                                          video.LiveStreamingDetails.ActualEndTime.Value,
+                                          video.Snippet.Title,
+                                          video.Snippet.Thumbnails?.Maxres?.Url);
             }
 
             return null;

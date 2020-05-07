@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xaml;
 
 using ApiReviewList.Reports;
 
@@ -12,6 +13,7 @@ namespace ApiReviewList.ViewModels
         private bool _canSendNotes;
         private bool _isLoading;
         private DateTime _selectedDate;
+        private ApiReviewVideo _video;
         private IReadOnlyCollection<NotesEntryViewModel> _entries;
 
         private ApiReviewSummary _originalSummary;
@@ -62,6 +64,19 @@ namespace ApiReviewList.ViewModels
             }
         }
 
+        public ApiReviewVideo Video
+        {
+            get => _video;
+            set
+            {
+                if (_video != value)
+                {
+                    _video = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public IReadOnlyCollection<NotesEntryViewModel> Entries
         {
             get => _entries;
@@ -100,6 +115,7 @@ namespace ApiReviewList.ViewModels
                 return;
 
             _originalSummary = summary;
+            Video = summary.Video;
             Entries = summary.Items.Select(i => new NotesEntryViewModel(this, i)).ToArray();
             IsLoading = false;
         }

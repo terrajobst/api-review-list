@@ -46,10 +46,13 @@
                         </Style>
                     </ProgressBar.Style>
                 </ProgressBar>
-                <ScrollViewer HorizontalScrollBarVisibility="Hidden"
-                              VerticalScrollBarVisibility="Auto">
-                    <ScrollViewer.Style>
-                        <Style TargetType="ScrollViewer">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsLoading}"
                                              Value="True">
@@ -60,17 +63,27 @@
                             <Setter Property="Visibility"
                                     Value="Visible" />
                         </Style>
-                    </ScrollViewer.Style>
-                    <ItemsControl ItemsSource="{Binding Entries}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox Margin="8,8,8,0"
+                    </Grid.Style>
+                    <TextBlock Margin="8,8,8,0">                        
+                        <Hyperlink NavigateUri="{Binding Video.Url, Mode=OneWay}"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            <Run Text="{Binding Video.Title, Mode=OneWay}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Entries}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Margin="8,8,8,0"
                                       IsChecked="{Binding IsChecked}"
                                       Content="{Binding Model.Feedback.IssueTitle}"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
             </Grid>
         </Grid>
         <StackPanel Grid.Row="1"
