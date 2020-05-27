@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xaml;
 
 using ApiReviewList.Reports;
 
@@ -15,7 +14,6 @@ namespace ApiReviewList.ViewModels
         private DateTime _selectedDate;
         private ApiReviewVideo _video;
         private IReadOnlyCollection<NotesEntryViewModel> _entries;
-
         private ApiReviewSummary _originalSummary;
 
         public NotesViewModel()
@@ -91,6 +89,8 @@ namespace ApiReviewList.ViewModels
             }
         }
 
+        public SendOptionsViewModel SendOptions { get; } = new SendOptionsViewModel();
+
         public ApiReviewSummary GetSelectedSummary()
         {
             return new ApiReviewSummary(_originalSummary.Date,
@@ -101,10 +101,18 @@ namespace ApiReviewList.ViewModels
         public async Task SendAsync()
         {
             var summary = GetSelectedSummary();
-            await summary.UpdateVideoDescriptionAsync();
-            await summary.UpdateCommentsAsync();
-            await summary.CommitAsync();
-            summary.SendEmail();
+
+            if (SendOptions.UpdateVideoDescription)
+                await summary.UpdateVideoDescriptionAsync();
+
+            if (SendOptions.UpdateReviewComments)
+                await summary.UpdateCommentsAsync();
+
+            if (SendOptions.CommitNotes)
+                await summary.CommitAsync();
+
+            if (SendOptions.SendEmail)
+                summary.SendEmail();
         }
 
         private async void UpdateEntries()

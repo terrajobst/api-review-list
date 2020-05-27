@@ -11,7 +11,7 @@
         ShowInTaskbar="False"
         Title="Notes"
         Height="350"
-        Width="500">
+        Width="600">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -86,20 +86,49 @@
                 </Grid>
             </Grid>
         </Grid>
-        <StackPanel Grid.Row="1"
-                    Margin="16"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right">
-            <Button MinWidth="85"
+        <Grid Grid.Row="1"
+              Margin="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Column="0"
+                      Margin="0,0,16,0"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding SendOptions.UpdateVideoDescription}"
+                      Content="Video" />
+            <CheckBox Grid.Column="1"
+                      Margin="0,0,16,0"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding SendOptions.UpdateReviewComments}"
+                      Content="Comments" />
+            <CheckBox Grid.Column="2"
+                      Margin="0,0,16,0"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding SendOptions.CommitNotes}"
+                      Content="Commit" />
+            <CheckBox Grid.Column="3"
+                      Margin="0,0,16,0"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding SendOptions.SendEmail}"
+                      Content="Email" />
+            <Button Grid.Column="5"
+                    MinWidth="85"
                     IsDefault="True"
                     Content="Send Notes"
                     IsEnabled="{Binding CanSendNotes}"
                     Click="SendButton_Click" />
-            <Button MinWidth="85"
+            <Button Grid.Column="6"
+                    MinWidth="85"
                     Margin="8,0,0,0"
                     IsCancel="True"
                     Content="Cancel"
                     Click="CancelButton_Click" />
-        </StackPanel>
+        </Grid>
     </Grid>
 </Window>
