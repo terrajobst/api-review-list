@@ -77,8 +77,17 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <CheckBox Margin="8,8,8,0"
-                                      IsChecked="{Binding IsChecked}"
-                                      Content="{Binding Model.Feedback.IssueTitle}"/>
+                                      IsChecked="{Binding IsChecked}">
+                                        <CheckBox.Content>
+                                            <TextBlock>
+                                                <Hyperlink NavigateUri="{Binding Model.Feedback.FeedbackUrl}"
+                                                           RequestNavigate="Hyperlink_RequestNavigate">
+                                                    <Run Text="{Binding Model.Feedback.IssueNumber, StringFormat={}#{0}}" />
+                                                </Hyperlink>
+                                                <Run Text="{Binding Model.Feedback.IssueTitle}" />
+                                            </TextBlock>
+                                        </CheckBox.Content>
+                                    </CheckBox>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
