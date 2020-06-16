@@ -163,6 +163,9 @@
                         <MenuItem Click="CopyMenuItem_Click"
                                   Header="Copy"
                                   KeyTipService.KeyTip="Ctrl+C" />
+                        <MenuItem Click="SendMailMenuItem_Click"
+                                  Header="Send Mail"
+                                  KeyTipService.KeyTip="Ctrl+M" />
                     </ContextMenu.Items>
                 </ContextMenu>
             </DataGrid.ContextMenu>
@@ -176,15 +179,20 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="4" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="4" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
             <StatusBarItem Grid.Column="0" />
             <StatusBarItem Grid.Column="1">
-                <TextBlock Text="{Binding CountStatus}" />
+                <TextBlock Text="{Binding ElementName=DataGrid, Path=SelectedItems.Count, StringFormat={}{0} items selected}" />
             </StatusBarItem>
             <StatusBarItem Grid.Column="3">
+                <TextBlock Text="{Binding CountStatus}" />
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="4">
                 <TextBlock Text="{Binding TimeStatus}" />
             </StatusBarItem>
         </StatusBar>

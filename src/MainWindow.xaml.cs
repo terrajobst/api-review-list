@@ -6,6 +6,10 @@ using System.Windows.Input;
 
 using ApiReviewList.ViewModels;
 
+using Markdig;
+
+using Microsoft.Office.Interop.Outlook;
+
 namespace ApiReviewList
 {
     public partial class MainWindow : Window
@@ -125,12 +129,49 @@ namespace ApiReviewList
             Clipboard.SetDataObject(data, true);
         }
 
+        private void SendMail()
+        {
+            var selectedItems = DataGrid.SelectedItems.OfType<IssueViewModel>().ToArray();
+
+            if (selectedItems.Length == 0)
+                selectedItems = ((IssueListViewModel)DataContext).Issues.Take(15).ToArray();
+
+            if (selectedItems.Length == 0)
+                return;
+
+            var sb = new StringBuilder();
+            sb.Append($"Today, we're doing a backlog review. These are the next {selectedItems.Length} items in the queue:");
+            sb.AppendLine();
+            sb.AppendLine();
+
+            foreach (var item in selectedItems)
+            {
+                sb.Append("* ");
+                sb.Append(item.GetMarkdownLink());
+                sb.AppendLine();
+            }
+
+            var html = Markdown.ToHtml(sb.ToString());
+
+            var outlookApp = new Microsoft.Office.Interop.Outlook.Application();
+            var mailItem = (MailItem)outlookApp.CreateItem(OlItemType.olMailItem);
+            mailItem.To = "FXDR";
+            mailItem.Subject = $"Agenda for API Review {DateTime.Now.Date:d}";
+            mailItem.HTMLBody = html;
+            mailItem.Display(false);
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.F5)
             {
                 e.Handled = true;
                 Refresh();
+            }
+            else if (e.Key == Key.M && e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+            {
+                e.Handled = true;
+                SendMail();
             }
         }
 
@@ -180,6 +221,11 @@ namespace ApiReviewList
         private void CopyMenuItem_Click(object sender, RoutedEventArgs e)
         {
             CopySelectedIssues();
+        }
+
+        private void SendMailMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SendMail();
         }
     }
 }
