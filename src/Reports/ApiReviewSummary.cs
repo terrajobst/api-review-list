@@ -83,8 +83,10 @@ namespace ApiReviewList.Reports
 
         public static async Task<ApiReviewSummary> GetAsync(DateTimeOffset date)
         {
-            var playlistId = "PL1rZQsJPBU2S49OQPjupSJF-qeIEz9_ju";
-            var video = await ApiReviewVideo.GetAsync(playlistId, date);
+            var netFoundationChannelId = "UCiaZbznpWV1o-KLxj8zqR6A";
+            var start = date.Date.AddHours(9).AddMinutes(30);
+            var end = date.Date.AddHours(12).AddMinutes(30);
+            var video = await ApiReviewVideo.GetAsync(netFoundationChannelId, start, end);
             var items = await ApiReviewFeedback.GetAsync(date);
 
             return new ApiReviewSummary(date, video, items);
