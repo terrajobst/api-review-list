@@ -69,8 +69,13 @@ namespace ApiReviewList.ViewModels
                 }
             }
 
+            var sortedViewModels = viewModels
+                .OrderByDescending(vm => vm.IsBlocking)
+                .ThenBy(vm => vm.Model.CreatedAt)
+                .ToArray();
+
             Milestones = new ReadOnlyCollection<MilestoneViewModel>(milestones.Values.OrderBy(vm => vm.Text).ToArray());
-            Issues = new ReadOnlyCollection<IssueViewModel>(viewModels.OrderBy(vm => vm.Model.CreatedAt).ToArray());
+            Issues = new ReadOnlyCollection<IssueViewModel>(sortedViewModels);
 
             // Count status
 

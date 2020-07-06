@@ -43,6 +43,8 @@ namespace ApiReviewList.ViewModels
 
         public string Url => Model.HtmlUrl;
 
+        public bool IsBlocking => Labels.Any(l => string.Equals(l.Text, "blocking", StringComparison.OrdinalIgnoreCase));
+
         public MilestoneViewModel Milestone { get; }
 
         public ReadOnlyCollection<LabelViewModel> Labels { get; }
