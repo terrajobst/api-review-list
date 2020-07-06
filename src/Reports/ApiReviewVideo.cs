@@ -65,7 +65,7 @@ namespace ApiReviewList.Reports
                                .Select(CreateVideo)
                                .OrderByDescending(v => v.Duration);
 
-            return videos.LastOrDefault();
+            return videos.FirstOrDefault();
         }
 
         private static ApiReviewVideo CreateVideo(Video v)
